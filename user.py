@@ -17,7 +17,6 @@ class User(object):
 		self.salt = salt
 		self.hash = hashed
  
-
 	def generateSalt(self):
 		'''Generate a salt to be used to hash the user's password as a bytes object'''
 		if not self.salt: 	# If the salt variable is empty, we need to generate a salt.
@@ -38,26 +37,31 @@ class User(object):
 				else:
 					print('Invalid input!')
 		return self.salt
-            
 
-	def hashPassword(self, password):
-		'''Return a user's hashed plaintext password as a bytes object'''
-		password = password.encode('UTF-8')
-		self.salt = b''
-		self.salt = self.generateSalt() 	# Generate a salt first.
-
-		print('Hashing ' + self.username + '\'s password...')
+	def kdfWrapper(password):
+		'''Returns a hexlified desired key from a passphrase.'''
 		dk = hashlib.pbkdf2_hmac( 	# KDF function for hashing and key stretching.
 			'sha256',
 			password,
 			self.salt,
 			100000)
+		dk = binascii.hexlify(dk)
+		return dk
+            
+	def hashPassword(self, password, checkPassword=False):
+		'''Return a user's hashed plaintext password as a bytes object.'''
+		password = password.encode('UTF-8')
+		
+		if self.salt == b'': # Generate a salt if the generateSalt() call is forgetten.
+			self.salt = self.generateSalt() # Generate a salt first.
 
-		self.hash = binascii.hexlify(dk)
+		if not checkPassword: # We only want to print this message for the initial user registration.
+			print('Hashing ' + self.username + '\'s password...')
+
+		self.hash = kdfWrapper(password)
 		return self.hash
 
-
-	# def checkPassword(self, password):
-	# 	'''Check to see if a user's entered password's hash matches the hash of the stored password. True'''
-
-
+	def checkPassword(self, loginPassword):
+		'''Returns True if a user's entered password's hash matches the hash of the stored password.'''
+		loginPassword = loginPassword.encode('UTF-8')
+		return hashPassword(LoginPassword, True) == self.hash
