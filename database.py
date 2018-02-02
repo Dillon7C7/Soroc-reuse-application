@@ -25,7 +25,6 @@ class Database(object):
 			self.databaseName = self.databaseName + '.db'
 		return self.databaseName
 
-
 	def connect(self):
 		'''Connect to a database and create the cursor for it.'''
 		self.databaseName = self.handleExtension(self.databaseName)
@@ -50,16 +49,17 @@ class Database(object):
 					 (user.username, user.salt, user.hash))
 		self.db.commit()
 
-	def retrieveUserInfo(self, username):
+	def retrieveUserInfo(self, username): # By calling with the username string, we don't need to create a User object.
 		'''Takes a username string (of a user object) and returns a tuple containing the username, salt, and hash.'''
 		self.cursor.execute('''SELECT username, salt, hash FROM users WHERE username=?''', (username,))
-		self.db.commit() 	# Not sure if a commit is needed here, but added a call just in case.
+		self.db.commit() # Not sure if a commit is needed here, but added a call just in case.
+
 		userData = self.cursor.fetchone()
-		if not userData: 	# Does the user exist in the database? If not, return None.
-			print('WARNING: User ' + username + ' not found in database!')    ######## NEED FIX
+		if not userData: # Does the user exist in the database? If not, return None.
+			print('WARNING: User ' + username + ' not found in database!')  
 			return None
 		else:
-			print('Retrieved info for user: ' + userData[0] + '.')
+			print('Retrieved data for user: ' + userData[0] + '.')
 			return userData
 
 	def deleteUser(self, username):
