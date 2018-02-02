@@ -12,19 +12,25 @@ while True:
 		break
 	print('Invalid input!')
 
-#while True:
-print('Enter your username: ', end='')
-username = input()
+while True:
+	print('Enter your username: ', end='')
+	username = input()
+	if choice == '1': # Handle the login case.
 
-if choice == 1: # Handle the login case.
-	pw1 = getpass.getpass('Enter password: ')
-	userInfo = db.retrieveUserInfo(username)
-	
-
-
-
-	if userInfo: # User info was found.
-		account = user.User(*userInfo)
+		# We try to get BOTH username and password before alerting the user that login
+		# credientials are incorrect. This increases security, as an attacker doesn't know
+		# if a username is in the database or not.
+		pw1 = getpass.getpass('Enter password: ')
+		userInfo = db.retrieveUserInfo(username) # Is the user registered in the database?
+				  
+		if userInfo: # If True, user info was found. Now we can check the password.
+			currentUser = user.User(*userInfo) # Create a User object.
+			isPasswordCorrect = currentUser.checkPassword(pw1)
+			if isPasswordCorrect:
+				break
+		print('Incorrect username and/or password!')
+		# warning message from database.retrieveUserInfo()
+print('Gong xi ni')
 
 # else: 	# choice == 2
 # 	while True:
