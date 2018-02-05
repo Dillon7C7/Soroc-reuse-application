@@ -47,11 +47,17 @@ class Database(object):
 			print('Please hash ' + user.username + '\'s password first!')
 			print('No data inserted.')
 		else:
-			print('Inserting user info for ' + user.username + '...')
-			self.cursor.execute('''INSERT INTO users(
-					 	 username, salt, hash) VALUES(?,?,?)''',
-						 (user.username, user.salt, user.hash))
-			self.db.commit()
+			try:
+				with self.db: # Automatically commit or rollback transactions using with statement.
+					self.db.execute('''INSERT INTO users(
+							 	 username, salt, hash) VALUES(?,?,?)''',
+								 (user.username, user.salt, user.hash))
+					print('User info for ' + user.username + 'inserted into database!')
+			except sqlite3.IntegrityError:
+				print('User is already registered in database!')
+
+			# Since we are dealing with a database object,
+			# we do not need to close the connection here using a finally clause.
 
 	def retrieveUserInfo(self, username, verbose=True):
 		'''Takes a username string (of a user object) and returns a tuple containing the username, salt, and hash.'''
