@@ -57,16 +57,19 @@ class Database(object):
 		userData = self.cursor.fetchone()
 		if not userData: # Does the user exist in the database? If not, return None.
 			print('WARNING: User ' + username + ' not found in database!')  
-			return None
 		else:
 			print('Retrieved data for user: ' + userData[0] + '.')
-			return userData
+		return userData
 
 	def deleteUser(self, username):
-		'''Takes a username string (of a user object) and deletes that user from the database.'''
-		print('Deleting user info for ' + username + 'from the database...')
-		self.cursor.execute('''DELETE FROM users WHERE username=?''', (username,))
-		self.db.commit()
+		'''Takes the username of a user object and deletes that user's data from the database.'''
+		
+		if not self.retrieveUserInfo(username):
+			print('Nothing found to delete!')
+		else:
+			print('Deleting data for ' + username + ' from the database...')
+			self.cursor.execute('''DELETE FROM users WHERE username=?''', (username,))
+			self.db.commit()
 
 	def close(self):
 		'''Close the database connection.'''
