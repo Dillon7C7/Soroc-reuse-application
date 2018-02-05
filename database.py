@@ -14,8 +14,8 @@ class Database(object):
 		self.databaseName = databaseName
 		self.db = None
 		self.cursor = None
-		self.connect()
-		self.createTable()
+		self.connect() # Connect to the database.
+		self.createTable() # Create the table that will hold users' data.
 
 	def handleExtension(self, filename):
 		'''Append '.db' to filename if it doesn't exist.'''
@@ -43,14 +43,19 @@ class Database(object):
 
 	def insertUserInfo(self, user):
 		'''Takes a user object and inserts the user's information into the database.'''
-		print('Inserting user info for ' + user.username + '...')
-		self.cursor.execute('''INSERT INTO users(
-				 	 username, salt, hash) VALUES(?,?,?)''',
-					 (user.username, user.salt, user.hash))
-		self.db.commit()
+		if not user.salt or not user.hash: # Don't insert if the user doesn't have a hash or a salt.
+			print('Please hash ' + user.username + '\'s password first!')
+			print('No data inserted.')
+		else:
+			print('Inserting user info for ' + user.username + '...')
+			self.cursor.execute('''INSERT INTO users(
+					 	 username, salt, hash) VALUES(?,?,?)''',
+						 (user.username, user.salt, user.hash))
+			self.db.commit()
 
-	def retrieveUserInfo(self, username): # By calling with the username string, we don't need to create a User object.
+	def retrieveUserInfo(self, username, verbose=True):
 		'''Takes a username string (of a user object) and returns a tuple containing the username, salt, and hash.'''
+		# By calling with the username string, we don't need to create a User object.
 		self.cursor.execute('''SELECT username, salt, hash FROM users WHERE username=?''', (username,))
 		self.db.commit() # Not sure if a commit is needed here, but added a call just in case.
 
@@ -58,13 +63,14 @@ class Database(object):
 		if not userData: # Does the user exist in the database? If not, return None.
 			print('WARNING: User ' + username + ' not found in database!')  
 		else:
-			print('Retrieved data for user: ' + userData[0] + '.')
+			if verbose:
+				print('Retrieved data for user: ' + userData[0] + '.')
+
 		return userData
 
 	def deleteUser(self, username):
 		'''Takes the username of a user object and deletes that user's data from the database.'''
-		
-		if not self.retrieveUserInfo(username):
+		if not self.retrieveUserInfo(username, False):
 			print('Nothing found to delete!')
 		else:
 			print('Deleting data for ' + username + ' from the database...')
