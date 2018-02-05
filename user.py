@@ -19,7 +19,7 @@ class User(object):
  
 	def generateSalt(self):
 		'''Generate a salt to be used to hash the user's password as a bytes object'''
-		if not self.salt: 	# If the salt variable is empty, we need to generate a salt.
+		if not self.salt: # If the salt variable is empty, we need to generate a salt.
 			print('Generating salt for ' + self.username + '...')
 			self.salt = os.urandom(16)
 			self.salt = binascii.hexlify(self.salt)
@@ -42,7 +42,7 @@ class User(object):
 		'''Return a user's hashed plaintext password as a bytes object.'''
 		password = password.encode('UTF-8')
 
-		if self.salt == b'': # Generate a salt if the generateSalt() call is forgetten.
+		if not self.salt: # Generate a salt if the generateSalt() call is forgetten.
 			self.salt = self.generateSalt() # Generate a salt first.
 
 		print('Hashing ' + self.username + '\'s password...')
