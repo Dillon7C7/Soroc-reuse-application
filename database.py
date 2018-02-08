@@ -76,11 +76,11 @@ class Database(object):
 
 	def deleteUser(self, user):
 		'''Takes a user object and deletes that user's data from the database.'''
-		if not self.retrieveUserInfo(user, False):
+		if not self.retrieveUserInfo(user.username, False):
 			print('Nothing found to delete!')
 		else:
 			print('Deleting data for ' + user.username + ' from the database...')
-			self.cursor.execute('''DELETE FROM users WHERE username=?''', (username,))
+			self.cursor.execute('''DELETE FROM users WHERE username=?''', (user.username,))
 			self.db.commit()
 
 	def close(self):
