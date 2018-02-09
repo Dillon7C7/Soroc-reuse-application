@@ -43,21 +43,24 @@ class Database(object):
 
 	def insertUserInfo(self, user):
 		'''Takes a user object and inserts the user's information into the database.'''
-		if not user.salt or not user.hash: # Don't insert if the user doesn't have a hash or a salt.
-			print('Please hash ' + user.username + '\'s password first!')
-			print('No data inserted.')
-		else:
-			try:
-				with self.db: # Automatically commit or rollback transactions using with statement.
-					self.db.execute('''INSERT INTO users(
-							 	 username, salt, hash) VALUES(?,?,?)''',
-								 (user.username, user.salt, user.hash))
-					print('User info for ' + user.username + 'inserted into database!')
-			except sqlite3.IntegrityError:
-				print('User is already registered in database!')
+		try:
+			if not user.salt or not user.hash: # Don't insert if the user doesn't have a hash or a salt.
+				print('Please hash ' + user.username + '\'s password first!')
+				print('No data inserted.')
+			else:
+				try:
+					with self.db: # Automatically commit or rollback transactions using with statement.
+						self.db.execute('''INSERT INTO users(
+								 	 username, salt, hash) VALUES(?,?,?)''',
+									 (user.username, user.salt, user.hash))
+						print('User info for ' + user.username + ' inserted into database!')
+				except sqlite3.IntegrityError:
+					print('User is already registered in database!')
 
-			# Since we are dealing with a database object,
-			# we do not need to close the connection here using a finally clause.
+				# Since we are dealing with a database object,
+				# we do not need to close the connection here using a finally clause.
+		except AttributeError:
+			print('Invalid argument given. Should be a user object.')
 
 	def retrieveUserInfo(self, username, verbose=True):
 		'''Takes a username string (of a user object) and returns a tuple containing the username, salt, and hash.'''
@@ -76,12 +79,15 @@ class Database(object):
 
 	def deleteUser(self, user):
 		'''Takes a user object and deletes that user's data from the database.'''
-		if not self.retrieveUserInfo(user.username, False):
-			print('Nothing found to delete!')
-		else:
-			print('Deleting data for ' + user.username + ' from the database...')
-			self.cursor.execute('''DELETE FROM users WHERE username=?''', (user.username,))
-			self.db.commit()
+		try:
+			if not self.retrieveUserInfo(user.username, False):
+				print('Nothing found to delete!')
+			else:
+				print('Deleting data for ' + user.username + ' from the database...')
+				self.cursor.execute('''DELETE FROM users WHERE username=?''', (user.username,))
+				self.db.commit()
+		except AttributeError:
+			print('Invalid argument given. Should be a user object.')
 
 	def close(self):
 		'''Close the database connection.'''
