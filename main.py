@@ -6,6 +6,8 @@ import database
 def userInitialization():
 	'''Login and registration logic.'''
 
+	db = database.Database('users.db')
+	
 	while True:
 		print('Press 1 to login.\nPress 2 to register your Soroc login ID with this application.')
 		choice = input()
@@ -35,7 +37,7 @@ def userInitialization():
 			# warning message from database.retrieveUserInfo()
 			print('Incorrect username and/or password!')
 		
-		else: # choice == 2
+		else: # choice == 2. Handle the "registration" case.
 
 			print('Enter your Reuse Application login username: ', end='')
 			username = input()
@@ -49,27 +51,7 @@ def userInitialization():
 
 			print('Passwords don\'t match!!')		
 
-print('Gong xi ni')
-
-# else: 	# choice == 2
-# 	while True:
-# 		pw1 = getpass.getpass('Enter password: ')
-# 		pw2 = getpass.getpass('Enter password again: ')
-# 		if pw1 == pw2:
-# 			break
-# 		print('Passwords did not match!')
-
-
-
-
-### ---------------- user not in database
-
-# print('User not found in database! Either the user doesn\'t exist, or the database file was moved.')
-# print('')
-
 if __name__ == '__main__':
 
 	print('Welcome to the Soroc Reuse Automation Application! Version 1')
-	db = database.Database('users.db')
-
 	userInitialization()
