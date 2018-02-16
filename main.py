@@ -9,11 +9,12 @@ def userInitialization():
 	db = database.Database('users.db')
 	
 	while True:
+
 		print('Press 1 to login.\nPress 2 to register your Soroc login ID with this application.')
 		choice = input()
 		if choice == '1' or choice == '2':
 			break
-		print('Invalid input!')
+		print('Invalid input!\n')
 
 	while True:
 		
@@ -27,31 +28,40 @@ def userInitialization():
 			username = input()
 			pw1 = getpass.getpass('Enter your password: ')
 
-			userInfo = db.retrieveUserInfo(username) # Is the user registered in the database?	  
+			userInfo = db.retrieveUserInfo(username, False) # Is the user registered in the database?	  
 			if userInfo: # If True, user info was found. Now we can check the password.
 				currentUser = user.User(*userInfo) # Create a User object.
-				isPasswordCorrect = currentUser.checkPassword(pw1)
-				if isPasswordCorrect:
+				if currentUser.checkPassword(pw1):
 					break
 
 			# warning message from database.retrieveUserInfo()
-			print('Incorrect username and/or password!')
+			print('Incorrect username and/or password!\n')
 		
 		else: # choice == 2. Handle the "registration" case.
 
 			print('Enter your Reuse Application login username: ', end='')
 			username = input()
-			pw1 = getpass.getpass('Enter your password: ')
-			pw2 = getpass.getpass('Enter your password again: ')
+			if not db.retrieveUserInfo(username, False): # User doesn't already exist in the database.
 
-			if pw1 == pw2:
-				currentUser = user.User(username)
-				currentUser.hashPassword(pw1)
-				break
+				pw1 = getpass.getpass('Enter your password: ')
+				pw2 = getpass.getpass('Enter your password again: ')
 
-			print('Passwords don\'t match!!')		
+				if pw1 == pw2:
+					currentUser = user.User(username)
+					currentUser.hashPassword(pw1)
+					db.insertUserInfo(currentUser)
+					break
+
+				else:
+					print('Passwords don\'t match!!\n')
+
+			else:
+				print('User is already registered in database!\n')		
+
+	db.close()
 
 if __name__ == '__main__':
 
-	print('Welcome to the Soroc Reuse Automation Application! Version 1')
+	print('Welcome to the Soroc Reuse Automation Application! Version 1\n')
 	userInitialization()
+	print('done')
